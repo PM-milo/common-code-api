@@ -11,6 +11,7 @@
       COMMON_CODE,
       CODE_NAME,
       USE_YN,
+      DEL_YN,
       SORT_ORDER,
       DESCRIPTION,
       CREATED_BY,
@@ -21,8 +22,69 @@
       TB_COMMON_CODE
     WHERE
       GROUP_CODE = #{groupCode}
-      AND USE_YN = 'Y'
+      AND DEL_YN = 'N'
     ORDER BY SORT_ORDER ASC
   </select>
 
+  <select id="countByGroupCodeAndCommonCode" resultType="int">
+    SELECT COUNT(*)
+    FROM TB_COMMON_CODE
+    WHERE GROUP_CODE = #{groupCode}
+      AND COMMON_CODE = #{commonCode}
+  </select>
+
+  <select id="countByGroupCode" resultType="int">
+    SELECT COUNT(*)
+    FROM TB_CODE_GROUP
+    WHERE GROUP_CODE = #{groupCode}
+  </select>
+
+  <insert id="insert" parameterType="CommonCodeDto">
+    INSERT INTO TB_COMMON_CODE (
+      GROUP_CODE,
+      COMMON_CODE,
+      CODE_NAME,
+      USE_YN,
+      DEL_YN,
+      SORT_ORDER,
+      DESCRIPTION,
+      CREATED_AT,
+      CREATED_BY
+    ) VALUES (
+      #{groupCode},
+      #{commonCode},
+      #{codeName},
+      #{useYn},
+      #{delYn},
+      #{sortOrder},
+      #{description},
+      CURRENT_TIMESTAMP,
+      #{createdBy}
+    )
+  </insert>
+
+  <update id="update" parameterType="CommonCodeDto">
+    UPDATE TB_COMMON_CODE
+    SET
+      CODE_NAME = #{codeName},
+      USE_YN = #{useYn},
+      SORT_ORDER = #{sortOrder},
+      DESCRIPTION = #{description},
+      UPDATED_AT = CURRENT_TIMESTAMP,
+      UPDATED_BY = #{updatedBy}
+    WHERE
+      GROUP_CODE = #{groupCode}
+      AND COMMON_CODE = #{commonCode}
+  </update>
+
+  <update id="delete" parameterType="commonCodeDto">
+    UPDATE TB_COMMON_CODE
+    SET
+      DEL_YN = 'Y',
+      UPDATED_AT = CURRENT_TIMESTAMP,
+      UPDATED_BY = #{updatedBy}
+    WHERE
+      GROUP_CODE = #{groupCode}
+      AND COMMON_CODE = #{commonCode}
+  </update>
 </mapper>

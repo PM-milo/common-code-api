@@ -10,8 +10,9 @@ public class CommonCodeDto {
 
     private String groupCode;
     private String commonCode;
-    private String codeNAme;
+    private String codeName;
     private String useYn;
+    private String delYn;
     private Integer sortOrder;
     private String description;
 
