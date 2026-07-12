@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>공통 코드 관리</title>
+
+  <!-- Tabulator CSS -->
+  <link
+      href="https://unpkg.com/tabulator-tables@6.5.0/dist/css/tabulator.min.css"
+      rel="stylesheet"
+  >
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .search-area {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    input,
+    button {
+      padding: 8px 12px;
+    }
+
+    #common-code-table {
+      margin-top: 16px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>공통 코드 관리</h1>
+
+<div class="search-area">
+  <input
+      type="text"
+      id="group-code"
+      value="BANK"
+      placeholder="그룹 코드를 입력하세요"
+  >
+
+  <button type="button" id="search-button">
+    조회
+  </button>
+</div>
+
+<div class="form-area">
+
+  <input id="common-code" placeholder="공통 코드">
+
+  <input id="code-name" placeholder="코드명">
+
+  <input id="use-yn" value="Y" placeholder="사용 여부">
+
+  <input id="sort-order" type="number" placeholder="정렬 순서">
+
+  <input id="description" placeholder="설명">
+
+  <input id="created-by" value="SYSTEM" placeholder="생성자">
+
+  <button id="create-button">
+    등록
+  </button>
+
+</div>
+
+<div id="common-code-table"></div>
+
+<!-- Tabulator JS -->
+<script src="https://unpkg.com/tabulator-tables@6.5.0/dist/js/tabulator.min.js"></script>
+
+<script>
+  const table = new Tabulator("#common-code-table", {
+    layout: "fitColumns",
+    placeholder: "조회된 공통 코드가 없습니다.",
+
+    columns: [
+      {
+        title: "그룹 코드",
+        field: "groupCode"
+      },
+      {
+        title: "공통 코드",
+        field: "commonCode"
+      },
+      {
+        title: "코드명",
+        field: "codeName",
+        editor: "input"
+      },
+      {
+        title: "사용 여부",
+        field: "useYn",
+        editor: "list",
+        editorParams: {
+          values: ["Y", "N"]
+        },
+        hozAlign: "center"
+      },
+      {
+        title: "삭제 여부",
+        field: "delYn",
+        hozAlign: "center"
+      },
+      {
+        title: "정렬 순서",
+        field: "sortOrder",
+        editor: "number",
+        sorter: "number",
+        hozAlign: "right"
+      },
+      {
+        title: "설명",
+        field: "description",
+        editor: "input"
+      },
+      {
+        title: "생성자",
+        field: "createdBy"
+      },
+      {
+        title: "생성일",
+        field: "createdAt"
+      },
+      {
+        title: "수정자",
+        field: "updatedBy"
+      },
+      {
+        title: "수정일",
+        field: "updatedAt"
+      },
+      {
+        title: "수정",
+        formatter: function () {
+          return "<button type='button'>수정</button>";
+        },
+        hozAlign: "center",
+        width: 90,
+        cellClick: function (e, cell) {
+          updateCommonCode(cell.getRow().getData());
+        }
+      },
+      {
+        title: "삭제",
+        formatter: function () {
+          return "<button type='button'>삭제</button>";
+        },
+        hozAlign: "center",
+        width: 90,
+        cellClick: function (e, cell) {
+          deleteCommonCode(cell.getRow().getData());
+        }
+      }
+    ]
+  });
+
+  async function loadCommonCodes() {
+    const groupCodeInput =
+        document.getElementById("group-code");
+
+    const groupCode =
+        groupCodeInput.value.trim();
+
+    if (!groupCode) {
+      alert("그룹 코드를 입력하세요.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+          `/common-codes/${encodeURIComponent(groupCode)}`
+      );
+
+      if (!response.ok) {
+        const message = await response.text();
+
+        throw new Error(
+            message || "조회 중 오류가 발생했습니다."
+        );
+      }
+
+      const data = await response.json();
+
+      table.setData(data);
+
+    } catch (error) {
+      console.error(error);
+
+      table.clearData();
+
+      alert(error.message);
+    }
+  }
+  async function createCommonCode() {
+    const groupCode = document
+    .getElementById("group-code")
+    .value
+    .trim();
+
+    const requestBody = {
+      commonCode: document
+      .getElementById("common-code")
+      .value
+      .trim(),
+
+      codeName: document
+      .getElementById("code-name")
+      .value
+      .trim(),
+
+      useYn: document
+      .getElementById("use-yn")
+      .value
+      .trim(),
+
+      sortOrder: Number(
+          document.getElementById("sort-order").value
+      ),
+
+      description: document
+      .getElementById("description")
+      .value
+      .trim(),
+
+      createdBy: document
+      .getElementById("created-by")
+      .value
+      .trim()
+    };
+
+    try {
+      const response = await fetch(
+          `/common-codes/${encodeURIComponent(groupCode)}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestBody)
+          }
+      );
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "등록에 실패했습니다.");
+      }
+
+      alert("등록되었습니다.");
+
+      await loadCommonCodes();
+
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
+
+  async function updateCommonCode(rowData) {
+
+    console.log("수정할 행:", rowData);
+    console.log("groupCode:", rowData.groupCode);
+    console.log("commonCode:", rowData.commonCode);
+
+    const confirmed = confirm(
+        `${rowData.commonCode} 코드를 수정하시겠습니까?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const requestBody = {
+      codeName: rowData.codeName,
+      useYn: rowData.useYn,
+      sortOrder: Number(rowData.sortOrder),
+      description: rowData.description,
+      updatedBy: "SYSTEM"
+    };
+
+    try {
+      const response = await fetch(
+          `/common-codes/${encodeURIComponent(rowData.groupCode)}/${encodeURIComponent(rowData.commonCode)}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestBody)
+          }
+      );
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "수정 중 오류가 발생했습니다.");
+      }
+
+      alert("수정되었습니다.");
+      await loadCommonCodes();
+
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
+
+  async function deleteCommonCode(rowData) {
+    const confirmed = confirm(
+        `${rowData.commonCode} - ${rowData.codeName} 코드를 삭제하시겠습니까?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+          `/common-codes/${encodeURIComponent(rowData.groupCode)}/${encodeURIComponent(rowData.commonCode)}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              updatedBy: "SYSTEM"
+            })
+          }
+      );
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "삭제 중 오류가 발생했습니다.");
+      }
+
+      alert("삭제되었습니다.");
+      await loadCommonCodes();
+
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
+
+  document
+  .getElementById("create-button")
+  .addEventListener("click", createCommonCode);
+
+  document
+  .getElementById("search-button")
+  .addEventListener("click", loadCommonCodes);
+
+  loadCommonCodes();
+</script>
+
+</body>
+</html>

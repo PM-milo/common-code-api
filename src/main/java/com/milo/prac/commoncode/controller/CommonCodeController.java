@@ -22,7 +22,7 @@ public class CommonCodeController {
 
     private final CommonCodeService commonCodeService;
 
-    @GetMapping("/{groupCode}/codes")
+    @GetMapping("/{groupCode}")
     public List<CommonCodeDto> findByGroupCode (
             @PathVariable String groupCode
     ) {

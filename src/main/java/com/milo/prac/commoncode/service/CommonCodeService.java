@@ -40,7 +40,7 @@ public class CommonCodeService {
         validateGroupCode(commonCodeDto.getGroupCode());
 
         validateCommonCode(
-                commonCodeDto.getCommonCode(),
+                commonCodeDto.getGroupCode(),
                 commonCodeDto.getCommonCode());
 
         commonCodeMapper.update(commonCodeDto);

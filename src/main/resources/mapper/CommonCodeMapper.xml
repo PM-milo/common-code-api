@@ -31,6 +31,7 @@
     FROM TB_COMMON_CODE
     WHERE GROUP_CODE = #{groupCode}
       AND COMMON_CODE = #{commonCode}
+      AND DEL_YN = 'N'
   </select>
 
   <select id="countByGroupCode" resultType="int">
@@ -55,7 +56,7 @@
       #{commonCode},
       #{codeName},
       #{useYn},
-      #{delYn},
+      'N',
       #{sortOrder},
       #{description},
       CURRENT_TIMESTAMP,
