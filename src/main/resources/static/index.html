@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>공통 코드 관리</title>
+  <title>공통 코드 및 계좌 관리</title>
 
-  <!-- Tabulator CSS -->
   <link
       href="https://unpkg.com/tabulator-tables@6.5.0/dist/css/tabulator.min.css"
       rel="stylesheet"
@@ -16,24 +15,41 @@
     body {
       font-family: Arial, sans-serif;
       margin: 40px;
+      background: #f5f6f8;
     }
 
-    h1 {
+    h1,
+    h2 {
       margin-bottom: 20px;
     }
 
-    .search-area {
+    .section {
+      background: white;
+      padding: 24px;
+      margin-bottom: 32px;
+      border-radius: 8px;
+    }
+
+    .search-area,
+    .form-area {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 16px;
     }
 
     input,
+    select,
     button {
       padding: 8px 12px;
     }
 
-    #common-code-table {
+    button {
+      cursor: pointer;
+    }
+
+    #common-code-table,
+    #account-table {
       margin-top: 16px;
     }
   </style>
@@ -41,48 +57,99 @@
 
 <body>
 
-<h1>공통 코드 관리</h1>
+<h1>공통 코드 및 계좌 관리</h1>
 
-<div class="search-area">
-  <input
-      type="text"
-      id="group-code"
-      value="BANK"
-      placeholder="그룹 코드를 입력하세요"
-  >
+<section class="section">
 
-  <button type="button" id="search-button">
-    조회
-  </button>
-</div>
+  <h2>공통 코드 관리</h2>
 
-<div class="form-area">
+  <div class="search-area">
+    <input
+        type="text"
+        id="group-code"
+        value="BANK"
+        placeholder="그룹 코드를 입력하세요"
+    >
 
-  <input id="common-code" placeholder="공통 코드">
+    <button type="button" id="search-button">
+      조회
+    </button>
+  </div>
 
-  <input id="code-name" placeholder="코드명">
+  <div class="form-area">
 
-  <input id="use-yn" value="Y" placeholder="사용 여부">
+    <input id="common-code" placeholder="공통 코드">
 
-  <input id="sort-order" type="number" placeholder="정렬 순서">
+    <input id="code-name" placeholder="코드명">
 
-  <input id="description" placeholder="설명">
+    <input id="use-yn" value="Y" placeholder="사용 여부">
 
-  <input id="created-by" value="SYSTEM" placeholder="생성자">
+    <input id="sort-order" type="number" placeholder="정렬 순서">
 
-  <button id="create-button">
-    등록
-  </button>
+    <input id="description" placeholder="설명">
 
-</div>
+    <input id="created-by" value="ADMIN" placeholder="생성자">
 
-<div id="common-code-table"></div>
+    <button id="create-button">
+      등록
+    </button>
 
-<!-- Tabulator JS -->
+  </div>
+
+  <div id="common-code-table"></div>
+
+</section>
+
+<section class="section">
+
+  <h2>계좌 관리</h2>
+
+  <div class="form-area">
+
+    <input
+        id="account-number"
+        placeholder="계좌번호"
+    >
+
+    <input
+        id="account-owner"
+        placeholder="예금주"
+    >
+
+    <select id="account-type-code">
+      <option value="">계좌유형 선택</option>
+      <option value="SAVING">예금</option>
+      <option value="CMA">CMA</option>
+      <option value="ISA">ISA</option>
+    </select>
+
+    <select id="bank-code">
+      <option value="">은행 선택</option>
+      <option value="001">우리은행</option>
+      <option value="002">국민은행</option>
+      <option value="003">신한은행</option>
+    </select>
+
+    <select id="account-use-yn">
+      <option value="Y">사용</option>
+      <option value="N">미사용</option>
+    </select>
+
+    <button id="account-create-button">
+      등록
+    </button>
+
+  </div>
+
+  <div id="account-table"></div>
+
+</section>
+
 <script src="https://unpkg.com/tabulator-tables@6.5.0/dist/js/tabulator.min.js"></script>
 
 <script>
-  const table = new Tabulator("#common-code-table", {
+
+  const commonCodeTable = new Tabulator("#common-code-table", {
     layout: "fitColumns",
     placeholder: "조회된 공통 코드가 없습니다.",
 
@@ -167,12 +234,91 @@
     ]
   });
 
-  async function loadCommonCodes() {
-    const groupCodeInput =
-        document.getElementById("group-code");
+  const accountTable = new Tabulator("#account-table", {
+    layout: "fitColumns",
+    placeholder: "조회된 계좌가 없습니다.",
 
-    const groupCode =
-        groupCodeInput.value.trim();
+    columns: [
+      {
+        title: "계좌번호",
+        field: "accountNumber"
+      },
+      {
+        title: "예금주",
+        field: "accountOwner",
+        editor: "input"
+      },
+      {
+        title: "계좌유형 코드",
+        field: "accountTypeCode"
+      },
+      {
+        title: "계좌유형",
+        field: "accountTypeName"
+      },
+      {
+        title: "은행 코드",
+        field: "bankCode"
+      },
+      {
+        title: "은행명",
+        field: "bankName"
+      },
+      {
+        title: "사용 여부",
+        field: "useYn",
+        editor: "list",
+        editorParams: {
+          values: ["Y", "N"]
+        },
+        hozAlign: "center"
+      },
+      {
+        title: "생성자",
+        field: "createdBy"
+      },
+      {
+        title: "생성일",
+        field: "createdAt"
+      },
+      {
+        title: "수정자",
+        field: "updatedBy"
+      },
+      {
+        title: "수정일",
+        field: "updatedAt"
+      },
+      {
+        title: "수정",
+        formatter: function () {
+          return "<button type='button'>수정</button>";
+        },
+        hozAlign: "center",
+        width: 90,
+        cellClick: function (e, cell) {
+          updateAccount(cell.getRow().getData());
+        }
+      },
+      {
+        title: "삭제",
+        formatter: function () {
+          return "<button type='button'>삭제</button>";
+        },
+        hozAlign: "center",
+        width: 90,
+        cellClick: function (e, cell) {
+          deleteAccount(cell.getRow().getData());
+        }
+      }
+    ]
+  });
+
+  async function loadCommonCodes() {
+    const groupCode = document
+    .getElementById("group-code")
+    .value
+    .trim();
 
     if (!groupCode) {
       alert("그룹 코드를 입력하세요.");
@@ -186,24 +332,20 @@
 
       if (!response.ok) {
         const message = await response.text();
-
-        throw new Error(
-            message || "조회 중 오류가 발생했습니다."
-        );
+        throw new Error(message || "조회 중 오류가 발생했습니다.");
       }
 
       const data = await response.json();
 
-      table.setData(data);
+      commonCodeTable.setData(data);
 
     } catch (error) {
       console.error(error);
-
-      table.clearData();
-
+      commonCodeTable.clearData();
       alert(error.message);
     }
   }
+
   async function createCommonCode() {
     const groupCode = document
     .getElementById("group-code")
@@ -269,11 +411,6 @@
   }
 
   async function updateCommonCode(rowData) {
-
-    console.log("수정할 행:", rowData);
-    console.log("groupCode:", rowData.groupCode);
-    console.log("commonCode:", rowData.commonCode);
-
     const confirmed = confirm(
         `${rowData.commonCode} 코드를 수정하시겠습니까?`
     );
@@ -287,7 +424,7 @@
       useYn: rowData.useYn,
       sortOrder: Number(rowData.sortOrder),
       description: rowData.description,
-      updatedBy: "SYSTEM"
+      updatedBy: "ADMIN"
     };
 
     try {
@@ -308,6 +445,7 @@
       }
 
       alert("수정되었습니다.");
+
       await loadCommonCodes();
 
     } catch (error) {
@@ -334,7 +472,7 @@
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
-              updatedBy: "SYSTEM"
+              updatedBy: "ADMIN"
             })
           }
       );
@@ -345,12 +483,189 @@
       }
 
       alert("삭제되었습니다.");
+
       await loadCommonCodes();
 
     } catch (error) {
       console.error(error);
       alert(error.message);
     }
+  }
+
+  async function loadAccounts() {
+    try {
+      const response = await fetch("/accounts");
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "계좌 조회에 실패했습니다.");
+      }
+
+      const data = await response.json();
+
+      accountTable.setData(data);
+
+    } catch (error) {
+      console.error(error);
+      accountTable.clearData();
+      alert(error.message);
+    }
+  }
+
+  async function createAccount() {
+    const accountNumber = document
+    .getElementById("account-number")
+    .value
+    .trim();
+
+    const accountOwner = document
+    .getElementById("account-owner")
+    .value
+    .trim();
+
+    const accountTypeCode = document
+    .getElementById("account-type-code")
+        .value;
+
+    const bankCode = document
+    .getElementById("bank-code")
+        .value;
+
+    const useYn = document
+    .getElementById("account-use-yn")
+        .value;
+
+    if (
+        !accountNumber ||
+        !accountOwner ||
+        !accountTypeCode ||
+        !bankCode
+    ) {
+      alert("계좌 정보를 모두 입력하세요.");
+      return;
+    }
+
+    const requestBody = {
+      accountNumber: accountNumber,
+      accountOwner: accountOwner,
+      accountTypeGroupCode: "ACCOUNT",
+      accountTypeCode: accountTypeCode,
+      bankGroupCode: "BANK",
+      bankCode: bankCode,
+      useYn: useYn,
+      createdBy: "ADMIN"
+    };
+
+    try {
+      const response = await fetch("/accounts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "계좌 등록에 실패했습니다.");
+      }
+
+      alert("계좌가 등록되었습니다.");
+
+      clearAccountForm();
+
+      await loadAccounts();
+
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
+
+  async function updateAccount(rowData) {
+    const confirmed = confirm(
+        `${rowData.accountNumber} 계좌를 수정하시겠습니까?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const requestBody = {
+      accountOwner: rowData.accountOwner,
+      accountTypeGroupCode: rowData.accountTypeGroupCode,
+      accountTypeCode: rowData.accountTypeCode,
+      bankGroupCode: rowData.bankGroupCode,
+      bankCode: rowData.bankCode,
+      useYn: rowData.useYn,
+      updatedBy: "ADMIN"
+    };
+
+    try {
+      const response = await fetch(
+          `/accounts/${encodeURIComponent(rowData.accountNumber)}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestBody)
+          }
+      );
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "계좌 수정에 실패했습니다.");
+      }
+
+      alert("계좌가 수정되었습니다.");
+
+      await loadAccounts();
+
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
+
+  async function deleteAccount(rowData) {
+    const confirmed = confirm(
+        `${rowData.accountNumber} 계좌를 삭제하시겠습니까?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+          `/accounts/${encodeURIComponent(rowData.accountNumber)}`,
+          {
+            method: "DELETE"
+          }
+      );
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "계좌 삭제에 실패했습니다.");
+      }
+
+      alert("계좌가 삭제되었습니다.");
+
+      await loadAccounts();
+
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    }
+  }
+
+  function clearAccountForm() {
+    document.getElementById("account-number").value = "";
+    document.getElementById("account-owner").value = "";
+    document.getElementById("account-type-code").value = "";
+    document.getElementById("bank-code").value = "";
+    document.getElementById("account-use-yn").value = "Y";
   }
 
   document
@@ -361,7 +676,13 @@
   .getElementById("search-button")
   .addEventListener("click", loadCommonCodes);
 
+  document
+  .getElementById("account-create-button")
+  .addEventListener("click", createAccount);
+
   loadCommonCodes();
+  loadAccounts();
+
 </script>
 
 </body>

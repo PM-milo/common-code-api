@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.milo.prac.commoncode.mapper.AccountMapper">
+
+  <select id="findAll" resultType="AccountDto">
+    SELECT
+      A.ACCOUNT_NUMBER,
+      A.ACCOUNT_OWNER,
+      A.ACCOUNT_TYPE_GROUP_CODE,
+      A.ACCOUNT_TYPE_CODE,
+      C.CODE_NAME AS ACCOUNT_TYPE_NAME,
+      A.BANK_GROUP_CODE,
+      A.BANK_CODE,
+      CB.CODE_NAME AS BANK_NAME,
+      A.USE_YN,
+      A.CREATED_AT,
+      A.CREATED_BY,
+      A.UPDATED_AT,
+      A.UPDATED_BY
+    FROM
+      TB_ACCOUNT A
+    JOIN
+      TB_COMMON_CODE C
+        ON A.ACCOUNT_TYPE_GROUP_CODE = C.GROUP_CODE
+        AND A.ACCOUNT_TYPE_CODE = C.COMMON_CODE
+    JOIN
+      TB_COMMON_CODE CB
+        ON A.BANK_GROUP_CODE = CB.GROUP_CODE
+        AND A.BANK_CODE = CB.COMMON_CODE
+    WHERE
+      A.USE_YN = 'Y'
+    ORDER BY A.CREATED_AT DESC
+  </select>
+
+  <insert id="insert" parameterType="AccountDto">
+    INSERT INTO TB_ACCOUNT (
+      ACCOUNT_NUMBER,
+      ACCOUNT_OWNER,
+      ACCOUNT_TYPE_GROUP_CODE,
+      ACCOUNT_TYPE_CODE,
+      BANK_GROUP_CODE,
+      BANK_CODE,
+      USE_YN,
+      CREATED_AT,
+      CREATED_BY
+    ) VALUES (
+      #{accountNumber},
+      #{accountOwner},
+      #{accountTypeGroupCode},
+      #{accountTypeCode},
+      #{bankGroupCode},
+      #{bankCode},
+      'Y',
+      CURRENT_TIMESTAMP,
+      #{createdBy}
+    )
+  </insert>
+
+  <update id="update" parameterType="AccountDto">
+    UPDATE TB_ACCOUNT
+    SET
+      ACCOUNT_OWNER = #{accountOwner},
+      ACCOUNT_TYPE_GROUP_CODE = #{accountTypeGroupCode},
+      ACCOUNT_TYPE_CODE = #{accountTypeCode},
+      USE_YN = #{useYn},
+      UPDATED_AT = CURRENT_TIMESTAMP,
+      UPDATED_BY = #{updatedBy}
+    WHERE
+      ACCOUNT_NUMBER = #{accountNumber}
+    AND
+      USE_YN = 'Y'
+  </update>
+
+  <delete id="delete" parameterType="String">
+    DELETE
+    FROM TB_ACCOUNT
+    WHERE ACCOUNT_NUMBER = #{accountNumber}
+  </delete>
+
+</mapper>
